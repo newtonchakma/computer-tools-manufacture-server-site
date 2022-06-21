@@ -20,6 +20,7 @@ async function run(){
             await client.connect()
             console.log('database connected');
             const serviceCollection = client.db('computer_tool').collection('services');
+            const orderCollection = client.db('computer_tool').collection('orders');
 
             app.get('/service', async(req, res) =>{
                 const query = {};
@@ -33,6 +34,14 @@ async function run(){
              const service = await serviceCollection.findOne(query)
               res.send(service)
           });
+
+          // order api
+      
+          app.post('/orders', async (req,res)=>{
+            const orders =req.body;
+            const result = await orderCollection.insertOne(orders)
+            res.send(result)
+          })
         }
         finally{
 
