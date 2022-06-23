@@ -34,14 +34,42 @@ async function run(){
              const service = await serviceCollection.findOne(query)
               res.send(service)
           });
-
-          // order api
+        
+        app.put('service/:id', async(req,res)=>{
+          const id = req.params.id;
+          console.log(id);
+          const data = req.body.availablequantity;
+          console.log(data);
+          const filter = {_id:ObjectId(id)};
+          const options = {upset:true};
+          const updateDoc = {
+            $set:{
+              quantity:data.newQuantity
+            }
+          };
+          const result = await serviceCollection.updateOne(filter,updateDoc,options);
+          res.send(result)
+        })
       
-          app.post('/orders', async (req,res)=>{
-            const orders =req.body;
-            const result = await orderCollection.insertOne(orders)
-            res.send(result)
+        app.get('/orders', async(req,res)=>{
+          const orderEmail =req?.query?.orderEmail;
+          const query = {orderEmail:orderEmail};
+          const order =await orderCollection.find(query).toArray();
+          res.send(order)
+        })
+
+          app.post('/orders', async(req,res)=>{
+            const orderEmail =req.body;
+            const query = {orderEmail:orderEmail.email};
+            const exists = await orderCollection.findOne(query);
+            if(exists){
+              return res.send({success:false, orderEmail:exists});
+              
+            }
+            const results = await orderCollection.insertOne(orderEmail);
+            res.send({success:true,results})
           })
+
         }
         finally{
 
