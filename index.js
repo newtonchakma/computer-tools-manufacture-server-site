@@ -21,6 +21,7 @@ async function run(){
             console.log('database connected');
             const serviceCollection = client.db('computer_tool').collection('services');
             const orderCollection = client.db('computer_tool').collection('orders');
+            const reviewCollection = client.db('computer_tool').collection('reviews');
 
             app.get('/service', async(req, res) =>{
                 const query = {};
@@ -51,6 +52,8 @@ async function run(){
           res.send(result)
         })
       
+
+
         app.get('/orders', async(req,res)=>{
           const orderEmail =req?.query?.orderEmail;
           const query = {orderEmail:orderEmail};
@@ -69,6 +72,13 @@ async function run(){
             const results = await orderCollection.insertOne(orderEmail);
             res.send({success:true,results})
           })
+
+            // user review
+      app.get('/reviews', async (req,res)=>{
+        const filter = req.body
+        const reviews = await reviewCollection.insertOne(filter)
+        res.send({success: "review uploaded ", reviews})
+      })
 
         }
         finally{
