@@ -40,6 +40,7 @@ async function run(){
             const orderCollection = client.db('computer_tool').collection('orders');
             const reviewCollection = client.db('computer_tool').collection('reviews');
             const usersCollection = client.db('computer_tool').collection('users');
+            const profileCollection = client.db('computer_tool').collection('profile');
 
             app.get('/service', async(req, res) =>{
                 const query = {};
@@ -69,16 +70,35 @@ async function run(){
           const result = await serviceCollection.updateOne(filter,updateDoc,options);
           res.send(result)
         })
+        
+       
+
       //create admine
-      app.put('/user/admin/:email',async(req,res)=>{
+      app.put('/user/admin/:email',varifyJWT, async(req,res)=>{
         const email=req.params.email;
-        const filter ={email:email};
-       const updateDoc={
-        $set:{role:'admin'},
-       }
-       const result = await usersCollection.updateOne(filter,updateDoc);
-       res.send(result);
+        const requester = req.decoded.email;
+        const requesterAccoount = await usersCollection.findOne({email:requester});
+        if(requesterAccoount.role === 'admin'){
+          const filter ={email:email};
+          const updateDoc={
+           $set:{role:'admin'},
+          }
+          const result = await usersCollection.updateOne(filter,updateDoc);
+          res.send(result);
+        }
+        else{
+          res.status(403).send({message: 'forbidden'});
+        }
       })
+      
+      app.get('/admin/:email', async(req,res)=>{
+        const email = req.params.email;
+        const user = await usersCollection.findOne({email:email});
+        const isAdmin= user.role === 'admin';
+        res.send({admin: isAdmin})
+      })
+
+  
       //create user
       app.put('/user/:email',async(req,res)=>{
         const email=req.params.email;
@@ -97,7 +117,7 @@ async function run(){
         const users = await usersCollection.find().toArray()
         res.send(users)
       })
-
+      // order api
         app.post('/orders', async(req,res)=>{
           const orderEmail =req.body;
           const query = {orderEmail:orderEmail.email};
@@ -123,6 +143,8 @@ async function run(){
           }
          
         })
+
+         
         // delete order
          app.delete("/orders/:id", async(req,res)=>{
             const id = req.params.id;
@@ -142,6 +164,19 @@ async function run(){
       app.get("/reviews", async (req, res) => {
         const reviews = await reviewCollection.find({}).toArray()
         res.send(reviews)
+    })
+
+    app.post('/profile', async (req, res) => {
+      const profile = req.body;
+      const result = await profileCollection.insertOne(profile);
+      res.send(result);
+    })
+    app.get('/profile', async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = profileCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
     })
 
         }
