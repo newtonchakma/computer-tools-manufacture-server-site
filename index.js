@@ -22,6 +22,7 @@ async function run(){
             const serviceCollection = client.db('computer_tool').collection('services');
             const orderCollection = client.db('computer_tool').collection('orders');
             const reviewCollection = client.db('computer_tool').collection('reviews');
+            const usersCollection = client.db('computer_tool').collection('users');
 
             app.get('/service', async(req, res) =>{
                 const query = {};
@@ -36,7 +37,7 @@ async function run(){
               res.send(service)
           });
         
-        app.put('service/:id', async(req,res)=>{
+         app.put('service/:id', async(req,res)=>{
           const id = req.params.id;
           console.log(id);
           const data = req.body.availablequantity;
@@ -51,8 +52,30 @@ async function run(){
           const result = await serviceCollection.updateOne(filter,updateDoc,options);
           res.send(result)
         })
-      
+      //create user
+      app.put('/user/:email',async(req,res)=>{
+        const email=req.params.email;
+        const user = req.body;
+        const filter ={email:email};
+       const options = {upsert:true};
+       const updateDoc={
+        $set:user,
+       };
+       const result = await usersCollection.updateOne(filter,updateDoc,options);
+       res.send(result);
+      })
 
+        app.post('/orders', async(req,res)=>{
+          const orderEmail =req.body;
+          const query = {orderEmail:orderEmail.email};
+          const exists = await orderCollection.findOne(query);
+          if(exists){
+            return res.send({success:false, orderEmail:exists});
+            
+          }
+          const results = await orderCollection.insertOne(orderEmail);
+          res.send({success:true,results})
+        })
 
         app.get('/orders', async(req,res)=>{
           const orderEmail =req?.query?.orderEmail;
@@ -60,25 +83,26 @@ async function run(){
           const order =await orderCollection.find(query).toArray();
           res.send(order)
         })
+        // delete order
+         app.delete("/orders/:id", async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id:ObjectId(id)};
+            const result = await orderCollection.deleteOne(filter);
+            res.send(result)
+         })
 
-          app.post('/orders', async(req,res)=>{
-            const orderEmail =req.body;
-            const query = {orderEmail:orderEmail.email};
-            const exists = await orderCollection.findOne(query);
-            if(exists){
-              return res.send({success:false, orderEmail:exists});
-              
-            }
-            const results = await orderCollection.insertOne(orderEmail);
-            res.send({success:true,results})
-          })
 
-            // user review
-      app.get('/reviews', async (req,res)=>{
-        const filter = req.body
-        const reviews = await reviewCollection.insertOne(filter)
-        res.send({success: "review uploaded ", reviews})
-      })
+      // user reviews added
+        app.post('/reviews', async(req,res)=>{
+          const reviews =req.body;
+          const result = await reviewCollection.insertOne(reviews)
+          res.send(result)
+        })
+        // user review get
+      app.get("/reviews", async (req, res) => {
+        const reviews = await reviewCollection.find({}).toArray()
+        res.send(reviews)
+    })
 
         }
         finally{
