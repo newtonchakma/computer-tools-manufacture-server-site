@@ -101,7 +101,7 @@ async function run(){
           res.status(403).send({message: 'forbidden'});
         }
       })
-      
+      // grt admine api
       app.get('/admin/:email', async(req,res)=>{
         const email = req.params.email;
         const user = await usersCollection.findOne({email:email});
@@ -196,6 +196,12 @@ async function run(){
       const result = await orderCollection.findOne(query)
       res.send({ success: "get successfully", result })
   })
+       app.delete('/allproducts/:id', VerifyJwt, async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) }
+            const result = await TotalServiceCollections.deleteOne(query)
+            res.send(result)
+        }) 
 
         }
         finally{
