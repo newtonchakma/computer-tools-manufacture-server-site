@@ -72,7 +72,7 @@ async function run(){
           res.send(result)
         })
         
-       app.post('/create-payment-intent', varifyJWT, async(req,res)=>{
+       app.post('/create-payment-intent',  async(req,res)=>{
         const service =req.body;
         const price = service.price;
         const amount = price*100;
