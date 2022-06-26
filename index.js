@@ -190,18 +190,13 @@ async function run(){
       res.send(result);
     })
 
-    app.get("/orders/:id", async (req, res) => {
+    /* app.get("/orders/:id", async (req, res) => {
       const id = req.params.id
       const query = { _id: ObjectId(id) }
       const result = await orderCollection.findOne(query)
       res.send({ success: "get successfully", result })
-  })
-       app.delete('/allproducts/:id', VerifyJwt, async (req, res) => {
-            const id = req.params.id
-            const query = { _id: ObjectId(id) }
-            const result = await TotalServiceCollections.deleteOne(query)
-            res.send(result)
-        }) 
+  }) */
+    
 
         }
         finally{
